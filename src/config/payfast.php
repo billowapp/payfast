@@ -2,11 +2,11 @@
 
 return [
 
-    'production' => false,
+    'production' => false, // If set to false 'testing mode' is active
 
-    'credentials' => [
-        'merchant_id' => '',
-        'merchant_key' => '',
+    'merchant' => [
+        'merchant_id' => '10000100', // Replace with your merchant ID from Payfast.
+        'merchant_key' => '46f0cd694581a', // Replace with your merchant key from Payfast.
     ],
 
     'urls' => [

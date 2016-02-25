@@ -1,10 +1,8 @@
 {
   "name": "billowapp/payfast",
   "author": "Warren Hansen",
-  "psr-4": {
-    "autoload": {
-      "Billow\\": "src/"
-    }
+  "autoload": {
+    "psr-4": {"Billow\\": "src/"}
   },
   "require": {
     "illuminate/support": "^5.2"

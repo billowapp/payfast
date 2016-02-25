@@ -1,11 +1,14 @@
 {
   "name": "billowapp/payfast",
   "author": "Warren Hansen",
-  "autoload": {
-    "psr-4": {"Billow\\": "src/"}
-  },
   "require": {
-    "illuminate/support": "^5.2"
+    "illuminate/support": "^5.2",
+    "sebastian/money": "1.6.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Billow\\": "src/"
+    }
   },
   "require-dev": {
     "symfony/var-dumper": "^3.0"

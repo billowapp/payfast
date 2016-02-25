@@ -15,7 +15,9 @@ class PayfastServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        // TODO: Implement register() method.
+        $this->publishes([
+            __DIR__.'/src/config/payfast.php' => config_path('courier.php'),
+        ]);
     }
 
 

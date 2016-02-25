@@ -57,7 +57,7 @@ class Payfast implements Payment
 
     public function setAmount($amount)
     {
-        $this->amount = Money::fromString((string) $amount, new Currency(config('payfast.currency')));
+        $this->amount = Money::fromString((string) $amount, new Currency(config('payfast.currency')))->getConvertedAmount();
     }
 
     public function paymentForm()

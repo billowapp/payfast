@@ -18,7 +18,7 @@ class Payfast implements Payment
 
     protected $item;
 
-    protected $output = '';
+    protected $output;
 
     protected $vars;
 

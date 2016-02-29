@@ -12,12 +12,13 @@ Add Laravel5 Payfast to your composer.json
 
 Add the PayfastServiceProvider to your providers array in config/app.php
 
-
+```php
     'providers' => [
         //
         
         'Billow\PayfastServiceProvider'
     ];
+```    
 ### Config
 publish default configuration file.
 
@@ -25,7 +26,7 @@ publish default configuration file.
 
 ### Usage
 
-
+```php
     <?php
     
     use Billow\Contracts\PaymentProcessor;
@@ -36,3 +37,4 @@ publish default configuration file.
     {
         $this->payfast = $payfast;
     }
+```    

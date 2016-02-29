@@ -4,9 +4,14 @@ A dead simple Laravel 5.2 payment processing class for payments through payfast.
 
 ## Installation
 
+Add Laravel5 Payfast to your composer.json
+
+
     composer require billowapp/payfast
 
-### Serivce Provider
+
+Add the PayfastServiceProvider to your providers array in config/app.php
+
 
     'providers' => [
         //
@@ -20,9 +25,6 @@ publish default configuration file.
 
 ### Usage
 
-There are 2 ways to instiate the Class.
-
-#### Option 1
 
     <?php
     

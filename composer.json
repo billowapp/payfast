@@ -3,7 +3,8 @@
   "author": "Warren Hansen",
   "require": {
     "illuminate/support": "^5.2",
-    "sebastian/money": "1.6.*"
+    "sebastian/money": "1.6.*",
+    "illuminate/http": "^5.2"
   },
   "autoload": {
     "psr-4": {

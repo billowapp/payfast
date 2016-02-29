@@ -3,6 +3,7 @@
 namespace Billow;
 
 use Billow\Contracts\Payment;
+use Illuminate\Http\Request;
 use SebastianBergmann\Money\Currency;
 use SebastianBergmann\Money\Money;
 use Illuminate\Support\Facades\Log;
@@ -112,16 +113,14 @@ class Payfast implements Payment
         return $htmlForm.'</form>';
     }
 
-    public function completePayment()
+    public function completePayment(Request $request)
     {
-        header( 'HTTP/1.0 200 OK' );
-        flush();
+        $this->setHeader();
 
-        define( 'SANDBOX_MODE', true );
-        $pfHost = SANDBOX_MODE ? 'sandbox.payfast.co.za' : 'www.payfast.co.za';
+        $pfHost = config('payfast.testing') ? 'sandbox.payfast.co.za' : 'www.payfast.co.za';
 
         // Posted variables from ITN
-        $pfData = $_POST;
+        $pfData = $request->all();
 
         // Strip any slashes in data
         foreach( $pfData as $key => $val )
@@ -146,7 +145,7 @@ class Payfast implements Payment
         // If a passphrase has been set in the PayFast Settings, then it needs to be included in the signature string.
         $passPhrase = ''; //You need to get this from a constant or stored in you website database
         /// !!!!!!!!!!!!!! If you testing your integration in the sandbox, the passPhrase needs to be empty !!!!!!!!!!!!
-        if( !empty( $passPhrase ) && !SANDBOX_MODE )
+        if( !empty( $passPhrase ) && !config('payfast.testing') )
         {
             $pfTempParamString .= '&passphrase='.urlencode( $passPhrase );
         }
@@ -208,6 +207,12 @@ class Payfast implements Payment
                 Log::info('unknown');
                 break;
         }
+    }
+
+    public function setHeader()
+    {
+        header( 'HTTP/1.0 200 OK' );
+        flush();
     }
 
 }

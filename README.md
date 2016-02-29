@@ -13,11 +13,11 @@ Add Laravel5 Payfast to your composer.json
 Add the PayfastServiceProvider to your providers array in config/app.php
 
 ```php
-    'providers' => [
-        //
+'providers' => [
+    //
         
-        'Billow\PayfastServiceProvider'
-    ];
+    'Billow\PayfastServiceProvider'
+];
 ```    
 ### Config
 publish default configuration file.
@@ -30,17 +30,17 @@ IMPORTANT: You will need to edit App\Http\Middleware\VerifyCsrfToken by adding t
     
 ```php
 
-    /*
-    |--------------------------------------------------------------------------
-    | Merchant Settings
-    |--------------------------------------------------------------------------
-    | All Merchant settings below are for example purposes only. for more info
-    | see www.payfast.co.za. The Merchant ID and Merchant Key can be obtained 
-    | from your payfast.co.za account.
-    |
-    */
+/*
+|--------------------------------------------------------------------------
+| Merchant Settings
+|--------------------------------------------------------------------------
+| All Merchant settings below are for example purposes only. for more info
+| see www.payfast.co.za. The Merchant ID and Merchant Key can be obtained 
+| from your payfast.co.za account.
+|
+*/
     
-    [
+[
 
     'testing' => true, // Set to false when in production.
 
@@ -62,28 +62,66 @@ IMPORTANT: You will need to edit App\Http\Middleware\VerifyCsrfToken by adding t
 Creating a payment returns an html form ready to POST to payfast. When the customer submits the form they will be redirected to payfast to complete payment. Upon successful payment the customer will be returned to the specified 'return_url' and in the case of a cancellation they will be returned to the specified 'cancel_url'
 
 ```php
-    <?php
+
+use Billow\Contracts\PaymentProcessor;
     
-    use Billow\Contracts\PaymentProcessor;
+Class PaymentController extends Controller
+{
+    public function confirmPayment(PaymentProcessor $payfast)
+    {
+        // Eloqunet example.  
+        $cartTotal = 9999;
+        $order = Order::create([
+                'm_payment_id' => '001',
+                'amount'       => $cartTotal     
+            ]);
     
-    Class PaymentController extends Controller
+        // Build up payment Paramaters.
+        $payfast->setBuyer('first name', 'last name', 'email');
+        $payfast->setAmount($order->amount);
+        $payfast->setItem('item-title', 'item-description');
+        $payfast->setMerchantReference($order->m_payment_id);
+    
+        // Return the payment form.
+        return $payfast->paymentForm('Place Order');
+        
+    }
+            
+}
+```  
+
+## ITN Responses
+
+
+```php
+
+use Billow\Contracts\PaymentProcessor;
+    
+Class PaymentController extends Controller
+{
+    public function itn(Request $request, PaymentProcessor $payfast)
     {
     
-        public function confirmPayment(PaymentProcessor $payfast)
+        // Retrieve the Order from persistance. Eloquent Example. 
+        $order = Order::where('m_payment_id', $request->get('m_payment_id'))->firstOrFail(); // Eloquent Example 
+    
+        // Verify the payment status.
+        $status = $payfast->verify($request, $order->amount, $order->m_payment_id)->status();
+    
+        // Handle the result of the transaction.
+        switch( $status )
         {
-            // At this point the order should be created and most likely set to a status of pending.    
-    
-            $amount = 9999; // Cart Total - Example Data.
-            $merchant_reference = 001 // Order Reference - Example Data.
-    
-            $payfast->setBuyer('first name', 'last name', 'email');
-            $payfast->setAmount($amount);
-            $payfast->setItem('item-title', 'item-description');
-            $payfast->setMerchantReference($merchant_reference);
-    
-            return $payfast->paymentForm('Place Order');
+            case 'COMPLETE': // Things went as planned, update your order status and notify the customer/admins.
+                break;
+            case 'FAILED': // We've got problems, notify admin and contact Payfast Support.
+                break;
+            case 'PENDING': // We've got problems, notify admin and contact Payfast Support.
+                break;
+            default: // We've got problems, notify admin to check logs.
+                break;
         }
-            
-    }
-    
+    }       
+        
+}
 ```    
+

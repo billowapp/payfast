@@ -52,7 +52,7 @@ publish default configuration file.
             $this->payfast->setItem('item-title', 'item-description');
             $this->payfast->setMerchantReference($merchant_reference);
     
-            return $this->payfast->paymentForm(false); // By default the form will return with a submit button. Set to false to exclude the submit button (handy for ajax form submissions).
+            return $this->payfast->paymentForm(); // Optional false parameter will remove the submit button..
         }
             
     }

@@ -201,4 +201,3 @@ $payfast->getPaymentForm(false) // No submit button, handy for submitting for vi
 $payfast->getPaymentForm('Cofirm and Pay') // Override Default Submit Button Text.
 
 ```
-

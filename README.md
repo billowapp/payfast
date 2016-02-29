@@ -59,6 +59,8 @@ IMPORTANT: You will need to edit App\Http\Middleware\VerifyCsrfToken by adding t
 ```
 ### Usage
 
+Creating a payment returns an html form ready to POST to payfast. When the customer submits the form they will be redirected to payfast to complete payment. Upon successful payment the customer will be returned to the specified 'return_url' and in the case of a cancellation they will be returned to the specified 'cancel_url'
+
 ```php
     <?php
     
@@ -66,26 +68,20 @@ IMPORTANT: You will need to edit App\Http\Middleware\VerifyCsrfToken by adding t
     
     Class PaymentController extends Controller
     {
-        protected $payfast;
-        
-        public function __construct(PaymentProcessor $payfast)
-        {
-            $this->payfast = $payfast;
-        }
-        
-        public function confirmPayment()
+    
+        public function confirmPayment(PaymentProcessor $payfast)
         {
             // At this point the order should be created and most likely set to a status of pending.    
     
             $amount = 9999; // Cart Total - Example Data.
             $merchant_reference = 001 // Order Reference - Example Data.
     
-            $this->payfast->setBuyer('first name', 'last name', 'email');
-            $this->payfast->setAmount($amount);
-            $this->payfast->setItem('item-title', 'item-description');
-            $this->payfast->setMerchantReference($merchant_reference);
+            $payfast->setBuyer('first name', 'last name', 'email');
+            $payfast->setAmount($amount);
+            $payfast->setItem('item-title', 'item-description');
+            $payfast->setMerchantReference($merchant_reference);
     
-            return $this->payfast->paymentForm();
+            return $payfast->paymentForm('Place Order');
         }
             
     }

@@ -31,10 +31,30 @@ publish default configuration file.
     
     use Billow\Contracts\PaymentProcessor;
     
-    protected $payfast;
-    
-    public function __construct(PaymentProcessor $payfast)
+    Class PaymentController extends Controller
     {
-        $this->payfast = $payfast;
+        protected $payfast;
+        
+        public function __construct(PaymentProcessor $payfast)
+        {
+            $this->payfast = $payfast;
+        }
+        
+        public function confirmPayment()
+        {
+            // At this point the order should be created and most likely set to a status of pending.    
+    
+            $amount = 99.99; // Cart Total - Example Data.
+            $merchant_reference = 001 // Order Reference - Example Data.
+    
+            $this->payfast->setBuyer('warren', 'hansen', 'sbtm01@payfast.co.za');
+            $this->payfast->setAmount($order->amount);
+            $this->payfast->setItem('urn', 'urn description');
+            $this->payfast->setMerchantReference($order->m_payment_id);
+    
+            return $this->payfast->paymentForm(false);
+        }
+            
     }
+    
 ```    

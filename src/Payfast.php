@@ -113,7 +113,7 @@ class Payfast implements Payment
         return $htmlForm.'</form>';
     }
 
-    public function completePayment(Request $request)
+    public function completePayment(Request $request, $amount, $payment_id)
     {
         $this->setHeader();
 
@@ -185,28 +185,13 @@ class Payfast implements Payment
             die('Source IP not Valid');
         }
 
-        $cartTotal = 200.22; //This amount needs to be sourced from your application
-        if( abs( floatval( $cartTotal ) - floatval( $pfData['amount_gross'] ) ) > 0.01 )
+        if( abs( floatval( $amount ) - floatval( $pfData['amount_gross'] ) ) > 0.01 )
         {
             Log::info('amounts miss match');
             die('Amounts Mismatch');
         }
 
-        switch( $pfData['payment_status'] )
-        {
-            case 'COMPLETE':
-                Log::info('complete');
-                break;
-            case 'FAILED':
-                Log::info('failed');
-                break;
-            case 'PENDING':
-                Log::info('pending');
-                break;
-            default:
-                Log::info('unknown');
-                break;
-        }
+        return $pfData['payment_status'];
     }
 
     public function setHeader()

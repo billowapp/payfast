@@ -74,7 +74,7 @@ Class PaymentController extends Controller
         // Eloqunet example.  
         $cartTotal = 9999;
         $order = Order::create([
-                'm_payment_id' => '001',
+                'm_payment_id' => '001', // A unique reference for the order.
                 'amount'       => $cartTotal     
             ]);
     

@@ -45,4 +45,8 @@ interface PaymentProcessor
      */
     public function status();
 
+    public function responseVars();
+
+    public function paymentForm($submitButton = true);
+
 }

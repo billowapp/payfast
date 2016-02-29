@@ -26,6 +26,8 @@ class Payfast implements PaymentProcessor
 
     protected $vars;
 
+    protected $response_vars;
+
     protected $host;
 
     protected $button;
@@ -122,7 +124,7 @@ class Payfast implements PaymentProcessor
 
         if($this->button)
         {
-            $htmlForm .= '<button type="submit">Pay Now</button>';
+            $htmlForm .= '<button type="submit">'.$this->getSubmitButton().'</button>';
         }
 
         return $htmlForm.'</form>';
@@ -132,9 +134,11 @@ class Payfast implements PaymentProcessor
     {
         $this->setHeader();
 
+        $this->response_vars = $request->all();
+
         $this->setAmount($amount);
 
-        foreach($request->all() as $key => $val)
+        foreach($this->response_vars as $key => $val)
         {
             $this->vars[$key] = stripslashes($val);
         }
@@ -229,5 +233,24 @@ class Payfast implements PaymentProcessor
     public function getHost()
     {
         return $this->host = config('payfast.testing') ? 'sandbox.payfast.co.za' : 'www.payfast.co.za';
+    }
+
+    public function getSubmitButton()
+    {
+        if($this->button === true)
+        {
+            return 'Pay Now';
+        }
+        if(strlen((string)$this->button) > 0)
+        {
+            return $this->button;
+        }
+
+        return false;
+    }
+
+    public function responseVars()
+    {
+        return $this->response_vars;
     }
 }

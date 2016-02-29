@@ -1,0 +1,27 @@
+<?php
+
+[
+    'm_payment_id' => '56d408910a71f',
+    'pf_payment_id' => '225212',
+    'payment_status' => 'COMPLETE',
+    'item_name' => 'urn',
+    'item_description' => 'urn description',
+    'amount_gross' => '200.22',
+    'amount_fee' => '-4.56',
+    'amount_net' => '195.66',
+    'custom_str1' => '',
+    'custom_str2' => '',
+    'custom_str3' => '',
+    'custom_str4' => '',
+    'custom_str5' => '',
+    'custom_int1' => '',
+    'custom_int2' => '',
+    'custom_int3' => '',
+    'custom_int4' => '',
+    'custom_int5' => '',
+    'name_first' => 'Test',
+    'name_last' => 'User 01',
+    'email_address' => 'sbtu01@payfast.co.za',
+    'merchant_id' => '10000100',
+    'signature' => '519d9b1c23dfcfa9928397bbb49052f0',
+];

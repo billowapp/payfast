@@ -60,6 +60,8 @@ class Payfast implements Payment
     public function setAmount($amount)
     {
         $this->amount = Money::fromString((string) $amount, new Currency(config('payfast.currency')))->getConvertedAmount();
+
+        Log::info('set amount: '. $this->amount);
     }
 
     public function paymentForm()
@@ -117,6 +119,8 @@ class Payfast implements Payment
     {
         $this->setHeader();
 
+        $this->setAmount($amount);
+
         $pfHost = config('payfast.testing') ? 'sandbox.payfast.co.za' : 'www.payfast.co.za';
 
         // Posted variables from ITN
@@ -151,7 +155,7 @@ class Payfast implements Payment
         }
         $signature = md5( $pfTempParamString );
 
-        if($signature!=$pfData['signature'])
+        if($signature != $pfData['signature'])
         {
             Log::info('invalid signature');
             die('Invalid Signature');
@@ -182,10 +186,11 @@ class Payfast implements Payment
 
         if( !in_array( $_SERVER['REMOTE_ADDR'], $validIps ) )
         {
+            Log::info('remote: not valid');
             die('Source IP not Valid');
         }
 
-        if( abs( floatval( $amount ) - floatval( $pfData['amount_gross'] ) ) > 0.01 )
+        if( abs( floatval( $this->amount ) - floatval( $pfData['amount_gross'] ) ) > 0.01 )
         {
             Log::info('amounts miss match');
             die('Amounts Mismatch');

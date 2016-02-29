@@ -7,9 +7,11 @@ use Illuminate\Http\Request;
 use SebastianBergmann\Money\Currency;
 use SebastianBergmann\Money\Money;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class Payfast implements Payment
 {
+
     protected $merchant;
 
     protected $buyer;
@@ -23,6 +25,8 @@ class Payfast implements Payment
     protected $output;
 
     protected $vars;
+
+    protected $host;
 
 
     public function __construct()
@@ -59,9 +63,9 @@ class Payfast implements Payment
 
     public function setAmount($amount)
     {
-        $this->amount = Money::fromString((string) $amount, new Currency(config('payfast.currency')))->getConvertedAmount();
+        $money = $this->newMoney($amount);
 
-        Log::info('set amount: '. $this->amount);
+        $this->amount = $money->getConvertedAmount();
     }
 
     public function paymentForm()
@@ -69,6 +73,8 @@ class Payfast implements Payment
         $this->vars = $this->paymentVars();
 
         $this->buildQueryString();
+
+        $this->vars['signature'] = md5($this->output);
 
         return $this->buildForm();
     }
@@ -95,15 +101,13 @@ class Payfast implements Payment
         {
             $this->output .= '&passphrase='.$passPhrase;
         }
-
-        $vars['signature'] = md5( $this->output );
     }
 
     public function buildForm()
     {
-        $pfHost = config('payfast.testing') ? 'sandbox.payfast.co.za' : 'www.payfast.co.za';
+        $this->getHost();
 
-        $htmlForm = '<form id="payfast-pay-form" action="https://'.$pfHost.'/eng/process" method="post">';
+        $htmlForm = '<form id="payfast-pay-form" action="https://'.$this->host.'/eng/process" method="post">';
 
         foreach($this->vars as $name => $value)
         {
@@ -115,94 +119,99 @@ class Payfast implements Payment
         return $htmlForm.'</form>';
     }
 
-    public function completePayment(Request $request, $amount, $payment_id)
+    public function completePayment(Request $request, $amount)
     {
         $this->setHeader();
 
         $this->setAmount($amount);
 
-        $pfHost = config('payfast.testing') ? 'sandbox.payfast.co.za' : 'www.payfast.co.za';
-
-        // Posted variables from ITN
-        $pfData = $request->all();
-
-        // Strip any slashes in data
-        foreach( $pfData as $key => $val )
+        foreach($request->all() as $key => $val)
         {
-            $pfData[$key] = stripslashes( $val );
+            $this->vars[$key] = stripslashes($val);
         }
 
-        $pfParamString = '';
+        $this->buildQueryString();
 
-        // $pfData includes of ALL the fields posted through from PayFast, this includes the empty strings
-        foreach( $pfData as $key => $val )
-        {
-            if( $key != 'signature' )
-            {
-                $pfParamString .= $key .'='. urlencode( $val ) .'&';
-            }
-        }
+        $this->validSignature($request->get('signature'));
 
-        // Remove the last '&' from the parameter string
-        $pfParamString = substr( $pfParamString, 0, -1 );
-        $pfTempParamString = $pfParamString;
-        // If a passphrase has been set in the PayFast Settings, then it needs to be included in the signature string.
-        $passPhrase = ''; //You need to get this from a constant or stored in you website database
-        /// !!!!!!!!!!!!!! If you testing your integration in the sandbox, the passPhrase needs to be empty !!!!!!!!!!!!
-        if( !empty( $passPhrase ) && !config('payfast.testing') )
-        {
-            $pfTempParamString .= '&passphrase='.urlencode( $passPhrase );
-        }
-        $signature = md5( $pfTempParamString );
+        $this->validateHost($request);
 
-        if($signature != $pfData['signature'])
-        {
-            Log::info('invalid signature');
-            die('Invalid Signature');
-        }
+        $this->validateAmount($request->get('amount_gross'));
 
-        // Variable initialization
-        $validHosts = array(
-            'www.payfast.co.za',
-            'sandbox.payfast.co.za',
-            'w1w.payfast.co.za',
-            'w2w.payfast.co.za',
-        );
+        return $request->get('payment_status');
 
-        $validIps = array();
-
-        foreach( $validHosts as $pfHostname )
-        {
-            $ips = gethostbynamel( $pfHostname );
-
-            if( $ips !== false )
-            {
-                $validIps = array_merge( $validIps, $ips );
-            }
-        }
-
-        // Remove duplicates
-        $validIps = array_unique( $validIps );
-
-        if( !in_array( $_SERVER['REMOTE_ADDR'], $validIps ) )
-        {
-            Log::info('remote: not valid');
-            die('Source IP not Valid');
-        }
-
-        if( abs( floatval( $this->amount ) - floatval( $pfData['amount_gross'] ) ) > 0.01 )
-        {
-            Log::info('amounts miss match');
-            die('Amounts Mismatch');
-        }
-
-        return $pfData['payment_status'];
     }
 
     public function setHeader()
     {
-        header( 'HTTP/1.0 200 OK' );
+        header('HTTP/1.0 200 OK');
         flush();
     }
 
+    public function validSignature($signature)
+    {
+        if($this->vars['signature'] === $signature)
+        {
+            return true;
+        }else {
+            throw new Exception('Invalid Signature');
+        }
+    }
+
+    public function validateHost($request)
+    {
+        $hosts = $this->getHosts();
+
+        if( !in_array( $request->server('REMOTE_ADDR'), $hosts ) )
+        {
+            throw new Exception('Not a valid Host');
+        }
+
+        return true;
+    }
+
+    public function getHosts()
+    {
+        $hosts = [];
+
+        foreach(config('payfast.hosts') as $host)
+        {
+            $ips = gethostbynamel($host);
+
+            if(count($ips) > 0)
+            {
+                foreach($ips as $ip)
+                {
+                    $hosts[] = $ip;
+                }
+            }
+        }
+
+        return array_unique($hosts);
+    }
+
+    public function validateAmount($grossAmount)
+    {
+        if($this->amount === $this->newMoney($grossAmount, true)->getConvertedAmount())
+        {
+            return true;
+        }else {
+            throw new Exception('The gross amount does not match the order amount');
+        }
+    }
+
+    public function newMoney($amount, $fromString = false)
+    {
+        if($fromString)
+        {
+            return Money::fromString($amount, new Currency('ZAR'));
+        }
+
+        return new Money($amount, new Currency('ZAR'));
+    }
+
+    public function getHost()
+    {
+        return $this->host = config('payfast.testing') ? 'sandbox.payfast.co.za' : 'www.payfast.co.za';
+    }
 }

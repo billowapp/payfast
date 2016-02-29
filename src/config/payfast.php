@@ -14,4 +14,10 @@ return [
         'notify_url' => 'http://dev.biotree.earth/order/itn',
     ],
 
+    'hosts' => [
+        'www.payfast.co.za',
+        'sandbox.payfast.co.za',
+        'w1w.payfast.co.za',
+        'w2w.payfast.co.za',
+    ]
 ];

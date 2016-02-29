@@ -5,6 +5,7 @@ namespace Billow;
 use Billow\Contracts\Payment;
 use SebastianBergmann\Money\Currency;
 use SebastianBergmann\Money\Money;
+use Illuminate\Support\Facades\Log;
 
 class Payfast implements Payment
 {
@@ -109,6 +110,104 @@ class Payfast implements Payment
         //$htmlForm .= '<button type="submit">Pay Now</button>';
 
         return $htmlForm.'</form>';
+    }
+
+    public function completePayment()
+    {
+        header( 'HTTP/1.0 200 OK' );
+        flush();
+
+        define( 'SANDBOX_MODE', true );
+        $pfHost = SANDBOX_MODE ? 'sandbox.payfast.co.za' : 'www.payfast.co.za';
+
+        // Posted variables from ITN
+        $pfData = $_POST;
+
+        // Strip any slashes in data
+        foreach( $pfData as $key => $val )
+        {
+            $pfData[$key] = stripslashes( $val );
+        }
+
+        $pfParamString = '';
+
+        // $pfData includes of ALL the fields posted through from PayFast, this includes the empty strings
+        foreach( $pfData as $key => $val )
+        {
+            if( $key != 'signature' )
+            {
+                $pfParamString .= $key .'='. urlencode( $val ) .'&';
+            }
+        }
+
+        // Remove the last '&' from the parameter string
+        $pfParamString = substr( $pfParamString, 0, -1 );
+        $pfTempParamString = $pfParamString;
+        // If a passphrase has been set in the PayFast Settings, then it needs to be included in the signature string.
+        $passPhrase = ''; //You need to get this from a constant or stored in you website database
+        /// !!!!!!!!!!!!!! If you testing your integration in the sandbox, the passPhrase needs to be empty !!!!!!!!!!!!
+        if( !empty( $passPhrase ) && !SANDBOX_MODE )
+        {
+            $pfTempParamString .= '&passphrase='.urlencode( $passPhrase );
+        }
+        $signature = md5( $pfTempParamString );
+
+        if($signature!=$pfData['signature'])
+        {
+            Log::info('invalid signature');
+            die('Invalid Signature');
+        }
+
+        // Variable initialization
+        $validHosts = array(
+            'www.payfast.co.za',
+            'sandbox.payfast.co.za',
+            'w1w.payfast.co.za',
+            'w2w.payfast.co.za',
+        );
+
+        $validIps = array();
+
+        foreach( $validHosts as $pfHostname )
+        {
+            $ips = gethostbynamel( $pfHostname );
+
+            if( $ips !== false )
+            {
+                $validIps = array_merge( $validIps, $ips );
+            }
+        }
+
+        // Remove duplicates
+        $validIps = array_unique( $validIps );
+
+        if( !in_array( $_SERVER['REMOTE_ADDR'], $validIps ) )
+        {
+            die('Source IP not Valid');
+        }
+
+        $cartTotal = 200.22; //This amount needs to be sourced from your application
+        if( abs( floatval( $cartTotal ) - floatval( $pfData['amount_gross'] ) ) > 0.01 )
+        {
+            Log::info('amounts miss match');
+            die('Amounts Mismatch');
+        }
+
+        switch( $pfData['payment_status'] )
+        {
+            case 'COMPLETE':
+                Log::info('complete');
+                break;
+            case 'FAILED':
+                Log::info('failed');
+                break;
+            case 'PENDING':
+                Log::info('pending');
+                break;
+            default:
+                Log::info('unknown');
+                break;
+        }
     }
 
 }

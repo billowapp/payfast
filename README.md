@@ -1,5 +1,7 @@
 # Laravel5 Payfast
 
+WARNING: Still In Development. This package is still in development and will no doubt cause issues should you install it at this point. We're ironing out the kinks and as soon as we're happy we'll give it a stable status. See ToDo's.
+
 A dead simple Laravel 5.2 payment processing class for payments through payfast.co.za. This package only supports ITN transactions. Laravel5 Payfast is strictly use at own risk.
 
 ## Installation
@@ -90,8 +92,9 @@ Class PaymentController extends Controller
 }
 ```  
 
-## ITN Responses
+### ITN Responses
 
+Payfast will send a POST request to notify the merchant (You) with a status on the transaction. This will allow you to update your order status based on the appropriate status.
 
 ```php
 
@@ -123,5 +126,40 @@ Class PaymentController extends Controller
     }       
         
 }
-```    
+```  
+
+### Amounts
+
+The cart total may be set in 2 ways, as a string value:
+
+```php
+
+    $cartTotal = '99.99';
+
+    $payfast->setAmount($cartTotal);
+```
+
+Or as an Integer. In the case of an integer, the cart total must be passed through in cents, as follows:
+
+```php
+
+$cartTotal = 9999; // Laravel5 Payfast will parse this value and format it accordingly. See sebastianbergmann/money
+$payfast->setAmount($cartTotal);
+
+```
+
+### Payment Form
+
+By default the getPaymentForm() method will return a compiled HTML form including a submit button. There are 3 configurations available for the submit button.
+
+```php
+
+$payfast->getPaymentForm() // Default Text: 'Pay Now'
+
+$payfast->getPaymentForm(false) // No submit button, handy for submitting for via javascript
+
+$payfast->getPaymentForm('Cofirm and Pay') // Override Default Submit Button Text.
+
+```
+
 

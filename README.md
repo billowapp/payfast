@@ -20,6 +20,17 @@ publish default configuration file.
 
 ### Usage
 
+There are 2 ways to instiate the Class.
+
+#### Option 1
+
     <?php
     
-    use 
+    use Billow\Contracts\PaymentProcessor;
+    
+    protected $payfast;
+    
+    public function __construct(PaymentProcessor $payfast)
+    {
+        $this->payfast = $payfast;
+    }

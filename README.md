@@ -47,12 +47,12 @@ publish default configuration file.
             $amount = 99.99; // Cart Total - Example Data.
             $merchant_reference = 001 // Order Reference - Example Data.
     
-            $this->payfast->setBuyer('warren', 'hansen', 'sbtm01@payfast.co.za');
-            $this->payfast->setAmount($order->amount);
-            $this->payfast->setItem('urn', 'urn description');
-            $this->payfast->setMerchantReference($order->m_payment_id);
+            $this->payfast->setBuyer('first name', 'last name', 'email');
+            $this->payfast->setAmount($amount);
+            $this->payfast->setItem('item-title', 'item-description');
+            $this->payfast->setMerchantReference($merchant_reference);
     
-            return $this->payfast->paymentForm(false);
+            return $this->payfast->paymentForm(false); // By default the form will return with a submit button. Set to false to exclude the submit button (handy for ajax form submissions).
         }
             
     }

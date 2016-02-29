@@ -237,13 +237,14 @@ class Payfast implements PaymentProcessor
 
     public function getSubmitButton()
     {
-        if($this->button === true)
-        {
-            return 'Pay Now';
-        }
-        if(strlen((string)$this->button) > 0)
+        if(is_string($this->button))
         {
             return $this->button;
+        }
+
+        if($this->button == true)
+        {
+            return 'Pay Now';
         }
 
         return false;

@@ -2,14 +2,14 @@
 
 namespace Billow;
 
-use Billow\Contracts\Payment;
+use Billow\Contracts\PaymentProcessor;
 use Illuminate\Http\Request;
 use SebastianBergmann\Money\Currency;
 use SebastianBergmann\Money\Money;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
-class Payfast implements Payment
+class Payfast implements PaymentProcessor
 {
 
     protected $merchant;
@@ -27,6 +27,10 @@ class Payfast implements Payment
     protected $vars;
 
     protected $host;
+
+    protected $button;
+
+    protected $status;
 
 
     public function __construct()
@@ -68,8 +72,10 @@ class Payfast implements Payment
         $this->amount = $money->getConvertedAmount();
     }
 
-    public function paymentForm()
+    public function paymentForm($submitButton = true)
     {
+        $this->button = $submitButton;
+
         $this->vars = $this->paymentVars();
 
         $this->buildQueryString();
@@ -114,12 +120,15 @@ class Payfast implements Payment
             $htmlForm .= '<input type="hidden" name="'.$name.'" value="'.$value.'">';
         }
 
-        //$htmlForm .= '<button type="submit">Pay Now</button>';
+        if($this->button)
+        {
+            $htmlForm .= '<button type="submit">Pay Now</button>';
+        }
 
         return $htmlForm.'</form>';
     }
 
-    public function completePayment(Request $request, $amount)
+    public function verify($request, $amount)
     {
         $this->setHeader();
 
@@ -138,8 +147,15 @@ class Payfast implements Payment
 
         $this->validateAmount($request->get('amount_gross'));
 
-        return $request->get('payment_status');
+        $this->status = $request->get('payment_status');
 
+        return $this;
+
+    }
+
+    public function status()
+    {
+        return $this->status;
     }
 
     public function setHeader()

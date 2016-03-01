@@ -45,8 +45,31 @@ interface PaymentProcessor
      */
     public function status();
 
+    /**
+     * @return array
+     */
     public function responseVars();
 
+    /**
+     * @param bool|string $submitButton
+     * @return mixed
+     */
     public function paymentForm($submitButton = true);
 
+    /**
+     * @return void
+     */
+    public function setHeader();
+
+    /**
+     * @param $signature
+     * @return boolean
+     */
+    public function validSignature($signature);
+
+    /**
+     * @param $request
+     * @return boolean
+     */
+    public function validateHost($request);
 }

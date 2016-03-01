@@ -1,6 +1,6 @@
 # Laravel5 Payfast
 
-WARNING: Still In Development. This package is still in development and will no doubt cause issues should you install it at this point. We're ironing out the kinks and as soon as we're happy we'll give it a stable status. See ToDo's.
+WARNING: Still In Development. This package is still in development and will no doubt cause issues should you install it at this point. We're ironing out the kinks and as soon as we're happy we'll give it a stable status. See To Do's.
 
 A dead simple Laravel 5.2 payment processing class for payments through payfast.co.za. This package only supports ITN transactions. Laravel5 Payfast is strictly use at own risk.
 

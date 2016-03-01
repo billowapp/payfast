@@ -207,3 +207,4 @@ $payfast->getPaymentForm('Confirm and Pay') // Override Default Submit Button Te
 1. Unit Testing
 2. Add in a Facade Class
 3. Allow for custom integers/strings
+4. Curl request to Payfast (validation)

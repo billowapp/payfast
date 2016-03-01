@@ -220,11 +220,11 @@ class Payfast implements PaymentProcessor
         }
     }
 
-    public function newMoney($amount, $fromString = false)
+    public function newMoney($amount)
     {
-        if($fromString)
+        if(is_string($amount) || is_float($amount))
         {
-            return Money::fromString($amount, new Currency('ZAR'));
+            return Money::fromString((string)$amount, new Currency('ZAR'));
         }
 
         return new Money($amount, new Currency('ZAR'));

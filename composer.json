@@ -1,6 +1,9 @@
 {
   "name": "billowapp/payfast",
   "author": "Warren Hansen",
+  "description": "Laravel 5.2 package for processing ITN payments through payfast.co.za",
+  "keywords": ["package", "laravel", "payfast"],
+  "license": "MIT",
   "require": {
     "illuminate/support": "^5.2",
     "sebastian/money": "1.6.*",

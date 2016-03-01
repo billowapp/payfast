@@ -69,6 +69,7 @@ use Billow\Contracts\PaymentProcessor;
     
 Class PaymentController extends Controller
 {
+
     public function confirmPayment(PaymentProcessor $payfast)
     {
         // Eloqunet example.  
@@ -86,7 +87,6 @@ Class PaymentController extends Controller
     
         // Return the payment form.
         return $payfast->paymentForm('Place Order');
-        
     }
             
 }
@@ -94,7 +94,7 @@ Class PaymentController extends Controller
 
 ### ITN Responses
 
-Payfast will send a POST request to notify the merchant (You) with a status on the transaction. This will allow you to update your order status based on the appropriate status sent back from Payfast.
+Payfast will send a POST request to notify the merchant (You) with a status on the transaction. This will allow you to update your order status based on the appropriate status sent back from Payfast. You are not forced to use the key 'm_payment_id' to store your merchant reference but this is the the key that will be returned back to you from Payfast for further verification.
 
 ```php
 
@@ -102,9 +102,9 @@ use Billow\Contracts\PaymentProcessor;
     
 Class PaymentController extends Controller
 {
+
     public function itn(Request $request, PaymentProcessor $payfast)
     {
-    
         // Retrieve the Order from persistance. Eloquent Example. 
         $order = Order::where('m_payment_id', $request->get('m_payment_id'))->firstOrFail(); // Eloquent Example 
     

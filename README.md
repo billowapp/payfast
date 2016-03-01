@@ -201,3 +201,9 @@ $payfast->getPaymentForm(false) // No submit button, handy for submitting the fo
 $payfast->getPaymentForm('Confirm and Pay') // Override Default Submit Button Text.
 
 ```
+
+### To Do's
+
+1. Unit Testing
+2. Add in a Facade Class
+3. Allow for custom integers/strings

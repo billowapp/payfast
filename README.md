@@ -94,7 +94,7 @@ Class PaymentController extends Controller
 
 ### ITN Responses
 
-Payfast will send a POST request to notify the merchant (You) with a status on the transaction. This will allow you to update your order status based on the appropriate status.
+Payfast will send a POST request to notify the merchant (You) with a status on the transaction. This will allow you to update your order status based on the appropriate status sent back from Payfast.
 
 ```php
 
@@ -196,8 +196,8 @@ By default the getPaymentForm() method will return a compiled HTML form includin
 
 $payfast->getPaymentForm() // Default Text: 'Pay Now'
 
-$payfast->getPaymentForm(false) // No submit button, handy for submitting for via javascript
+$payfast->getPaymentForm(false) // No submit button, handy for submitting the form via javascript
 
-$payfast->getPaymentForm('Cofirm and Pay') // Override Default Submit Button Text.
+$payfast->getPaymentForm('Confirm and Pay') // Override Default Submit Button Text.
 
 ```

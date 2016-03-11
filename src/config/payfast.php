@@ -20,4 +20,13 @@ return
         'return_url' => 'http://your-domain.co.za/success', // The URL the customer should be redirected to after a successful payment.
         'cancel_url' => 'http://your-domain.co.za/cancelled', // The URL the customer should be redirected to after a payment is cancelled.
         'notify_url' => 'http://your-domain.co.za/itn', // The URL to which Payfast will post return variables.
-]];
+    ],
+
+    'hosts' => [
+        'www.payfast.co.za',
+        'sandbox.payfast.co.za',
+        'w1w.payfast.co.za',
+        'w2w.payfast.co.za',
+    ]
+
+];

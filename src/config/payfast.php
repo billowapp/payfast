@@ -17,9 +17,9 @@ return
     'merchant' => [
         'merchant_id' => '10000100', // TEST Credentials. Replace with your merchant ID from Payfast.
         'merchant_key' => '46f0cd694581a', // TEST Credentials. Replace with your merchant key from Payfast.
-        'return_url' => 'http://your-domain.co.za/success', // The URL the customer should be redirected to after a successful payment.
-        'cancel_url' => 'http://your-domain.co.za/cancelled', // The URL the customer should be redirected to after a payment is cancelled.
-        'notify_url' => 'http://your-domain.co.za/itn', // The URL to which Payfast will post return variables.
+        'return_url' => env('PF_RETURN_URL', 'http://your-domain.co.za/success'), // Redirect URL on Success.
+        'cancel_url' => env('PF_CANCEL_URL', 'http://your-domain.co.za/success'), // Redirect URL on Cancellation.
+        'notify_url' => env('PF_ITN_URL', 'http://your-domain.co.za/success'), // ITN URL.
     ],
 
     'hosts' => [

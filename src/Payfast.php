@@ -254,4 +254,14 @@ class Payfast implements PaymentProcessor
     {
         return $this->response_vars;
     }
+
+    public function setCancelUrl($url)
+    {
+        $this->merchant['cancel_url'] = $url;
+    }
+
+    public function setReturnUrl($url)
+    {
+        $this->merchant['return_url'] = $url;
+    }
 }

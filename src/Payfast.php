@@ -94,17 +94,13 @@ class Payfast implements PaymentProcessor
 
     public function buildQueryString()
     {
-
         foreach($this->vars as $key => $val )
         {
-            if(!empty($val))
-            {
+            if(!empty($val)) {
                 $this->output .= $key .'='. urlencode( trim( $val ) ) .'&';
             }
         }
-
         $this->output = substr( $this->output, 0, -1 );
-
         if( isset( $passPhrase ) )
         {
             $this->output .= '&passphrase='.$passPhrase;
@@ -114,47 +110,33 @@ class Payfast implements PaymentProcessor
     public function buildForm()
     {
         $this->getHost();
-
         $htmlForm = '<form id="payfast-pay-form" action="https://'.$this->host.'/eng/process" method="post">';
-
         foreach($this->vars as $name => $value)
         {
             $htmlForm .= '<input type="hidden" name="'.$name.'" value="'.$value.'">';
         }
-
         if($this->button)
         {
             $htmlForm .= '<button type="submit">'.$this->getSubmitButton().'</button>';
         }
-
         return $htmlForm.'</form>';
     }
 
     public function verify($request, $amount)
     {
         $this->setHeader();
-
         $this->response_vars = $request->all();
-
         $this->setAmount($amount);
-
         foreach($this->response_vars as $key => $val)
         {
             $this->vars[$key] = stripslashes($val);
         }
-
         $this->buildQueryString();
-
         $this->validSignature($request->get('signature'));
-
         $this->validateHost($request);
-
         $this->validateAmount($request->get('amount_gross'));
-
         $this->status = $request->get('payment_status');
-
         return $this;
-
     }
 
     public function status()
@@ -206,13 +188,12 @@ class Payfast implements PaymentProcessor
                 }
             }
         }
-
         return array_unique($hosts);
     }
 
     public function validateAmount($grossAmount)
     {
-        if($this->amount === $this->newMoney($grossAmount, true)->getConvertedAmount())
+        if($this->amount === $this->newMoney($grossAmount, true)->getAmount())
         {
             return true;
         }else {
@@ -246,7 +227,6 @@ class Payfast implements PaymentProcessor
         {
             return 'Pay Now';
         }
-
         return false;
     }
 

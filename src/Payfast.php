@@ -70,7 +70,6 @@ class Payfast implements PaymentProcessor
     public function setAmount($amount)
     {
         $money = $this->newMoney($amount);
-
         $this->amount = $money->getConvertedAmount();
     }
 
@@ -193,7 +192,7 @@ class Payfast implements PaymentProcessor
 
     public function validateAmount($grossAmount)
     {
-        if($this->amount === $this->newMoney($grossAmount, true)->getAmount())
+        if($this->amount === $this->newMoney($grossAmount)->getConvertedAmount())
         {
             return true;
         }else {

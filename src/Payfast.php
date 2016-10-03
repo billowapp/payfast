@@ -3,7 +3,6 @@
 namespace Billow;
 
 use Billow\Contracts\PaymentProcessor;
-use Billow\Utilities\Facades\Money as MoneyFacade;
 use Billow\Utilities\Money;
 use Exception;
 use Illuminate\Http\Request;
@@ -69,7 +68,7 @@ class Payfast implements PaymentProcessor
     public function setAmount($amount)
     {
         $money = $this->newMoney($amount);
-        $this->amount = $money->getConvertedAmount();
+        $this->amount = $money->convertedAmount();
     }
 
     public function paymentForm($submitButton = true)
@@ -202,7 +201,7 @@ class Payfast implements PaymentProcessor
     public function newMoney($amount)
     {
         return(is_string($amount) || is_float($amount))
-            ? MoneyFacade::fromString((string)$amount)
+            ? (new Money)->fromString((string)$amount)
             : new Money($amount);
     }
 

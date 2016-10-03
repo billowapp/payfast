@@ -190,7 +190,7 @@ class Payfast implements PaymentProcessor
 
     public function validateAmount($grossAmount)
     {
-        if($this->amount === $this->newMoney($grossAmount)->getConvertedAmount())
+        if($this->amount === $this->newMoney($grossAmount)->convertedAmount())
         {
             return true;
         }else {

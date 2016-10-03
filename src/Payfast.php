@@ -3,11 +3,10 @@
 namespace Billow;
 
 use Billow\Contracts\PaymentProcessor;
-use Illuminate\Http\Request;
-use SebastianBergmann\Money\Currency;
-use SebastianBergmann\Money\Money;
-use Illuminate\Support\Facades\Log;
+use Billow\Utilities\Facades\Money as MoneyFacade;
+use Billow\Utilities\Money;
 use Exception;
+use Illuminate\Http\Request;
 
 class Payfast implements PaymentProcessor
 {
@@ -202,12 +201,9 @@ class Payfast implements PaymentProcessor
 
     public function newMoney($amount)
     {
-        if(is_string($amount) || is_float($amount))
-        {
-            return Money::fromString((string)$amount, new Currency('ZAR'));
-        }
-
-        return new Money($amount, new Currency('ZAR'));
+        return(is_string($amount) || is_float($amount))
+            ? MoneyFacade::fromString((string)$amount)
+            : new Money($amount);
     }
 
     public function getHost()

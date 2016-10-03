@@ -6,8 +6,8 @@
   "license": "MIT",
   "require": {
     "illuminate/support": "^5.2",
-    "sebastian/money": "1.6.*",
-    "illuminate/http": "^5.2"
+    "illuminate/http": "^5.2",
+    "billowapp/show-me-the-money": "^0.1.1"
   },
   "autoload": {
     "psr-4": {

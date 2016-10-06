@@ -105,6 +105,7 @@ class Payfast implements PaymentProcessor
         return array_merge($this->merchant, $this->buyer, [
             'm_payment_id' => $this->merchantReference, 
             'amount' => $this->amount,
+            $this->item,
             'custom_int1' => $this->custom_int1,
             'custom_int2' => $this->custom_int2,
             'custom_int3' => $this->custom_int3,
@@ -114,8 +115,8 @@ class Payfast implements PaymentProcessor
             'custom_str2' => $this->custom_str2,
             'custom_str3' => $this->custom_str3,
             'custom_str4' => $this->custom_str4,
-            'custom_str5' => $this->custom_str5,
-            ], $this->item);
+            'custom_str5' => $this->custom_str5
+        ]);
     }
 
     public function buildQueryString()

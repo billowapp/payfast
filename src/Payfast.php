@@ -105,7 +105,8 @@ class Payfast implements PaymentProcessor
         return array_merge($this->merchant, $this->buyer, [
             'm_payment_id' => $this->merchantReference, 
             'amount' => $this->amount,
-            $this->item,
+            'item_name'         => $this->item['item_name'],
+            'item_description'  => $this->item['item_description'],
             'custom_int1' => $this->custom_int1,
             'custom_int2' => $this->custom_int2,
             'custom_int3' => $this->custom_int3,

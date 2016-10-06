@@ -32,6 +32,26 @@ class Payfast implements PaymentProcessor
 
     protected $status;
 
+    protected $custom_str1;
+
+    protected $custom_str2;
+
+    protected $custom_str3;
+
+    protected $custom_str4;
+
+    protected $custom_str5;
+
+    protected $custom_int1;
+
+    protected $custom_int2;
+    
+    protected $custom_int3;
+
+    protected $custom_int4;
+
+    protected $custom_int5;
+
 
     public function __construct()
     {
@@ -74,19 +94,28 @@ class Payfast implements PaymentProcessor
     public function paymentForm($submitButton = true)
     {
         $this->button = $submitButton;
-
         $this->vars = $this->paymentVars();
-
         $this->buildQueryString();
-
         $this->vars['signature'] = md5($this->output);
-
         return $this->buildForm();
     }
 
     public function paymentVars()
     {
-        return array_merge($this->merchant, $this->buyer, ['m_payment_id' => $this->merchantReference, 'amount' => $this->amount], $this->item);
+        return array_merge($this->merchant, $this->buyer, [
+            'm_payment_id' => $this->merchantReference, 
+            'amount' => $this->amount,
+            'custom_int1' => $this->custom_int1,
+            'custom_int2' => $this->custom_int2,
+            'custom_int3' => $this->custom_int3,
+            'custom_int4' => $this->custom_int4,
+            'custom_int5' => $this->custom_int5,
+            'custom_str1' => $this->custom_str1,
+            'custom_str2' => $this->custom_str2,
+            'custom_str3' => $this->custom_str3,
+            'custom_str4' => $this->custom_str4,
+            'custom_str5' => $this->custom_str5,
+            ], $this->item);
     }
 
     public function buildQueryString()
@@ -237,5 +266,55 @@ class Payfast implements PaymentProcessor
     public function setReturnUrl($url)
     {
         $this->merchant['return_url'] = $url;
+    }
+
+    public function setCustomStr1($string = '')
+    {
+        $this->custom_str1 = $string;
+    }
+
+    public function setCustomStr2($string = '')
+    {
+        $this->custom_str2 = $string;
+    }
+
+    public function setCustomStr3($string = '')
+    {
+        $this->custom_str3 = $string;
+    }
+
+    public function setCustomStr4($string = '')
+    {
+        $this->custom_str4 = $string;
+    }
+
+    public function setCustomStr5($string = '')
+    {
+        $this->custom_str5 = $string;
+    }
+
+    public function setCustomInt1($int)
+    {
+        $this->custom_int1 = $int;
+    }
+
+    public function setCustomInt2($int)
+    {
+        $this->custom_int2 = $int;
+    }
+
+    public function setCustomInt3($int)
+    {
+        $this->custom_int3 = $int;
+    }
+
+    public function setCustomInt4($int)
+    {
+        $this->custom_int4 = $int;
+    }
+
+    public function setCustomInt5($int)
+    {
+        $this->custom_int5 = $int;
     }
 }

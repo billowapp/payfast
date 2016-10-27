@@ -204,14 +204,10 @@ class Payfast implements PaymentProcessor
     {
         $hosts = [];
 
-        foreach(config('payfast.hosts') as $host)
-        {
+        foreach(config('payfast.hosts') as $host) {
             $ips = gethostbynamel($host);
-
-            if(count($ips) > 0)
-            {
-                foreach($ips as $ip)
-                {
+            if(count($ips) > 0) {
+                foreach($ips as $ip) {
                     $hosts[] = $ip;
                 }
             }
@@ -221,8 +217,7 @@ class Payfast implements PaymentProcessor
 
     public function validateAmount($grossAmount)
     {
-        if($this->amount === $this->newMoney($grossAmount)->convertedAmount())
-        {
+        if($this->amount === $this->newMoney($grossAmount)->convertedAmount()) {
             return true;
         }else {
             throw new Exception('The gross amount does not match the order amount');
@@ -243,13 +238,11 @@ class Payfast implements PaymentProcessor
 
     public function getSubmitButton()
     {
-        if(is_string($this->button))
-        {
+        if(is_string($this->button)) {
             return $this->button;
         }
 
-        if($this->button == true)
-        {
+        if($this->button == true) {
             return 'Pay Now';
         }
         return false;
@@ -268,6 +261,11 @@ class Payfast implements PaymentProcessor
     public function setReturnUrl($url)
     {
         $this->merchant['return_url'] = $url;
+    }
+
+    public function setNotifyUrl($url)
+    {
+        $this->merchant['notify_url'] = $url;
     }
 
     public function setCustomStr1($string = '')

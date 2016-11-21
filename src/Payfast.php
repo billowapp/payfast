@@ -51,6 +51,8 @@ class Payfast implements PaymentProcessor
     protected $custom_int4;
 
     protected $custom_int5;
+    
+    protected $payment_method;
 
 
     public function __construct()
@@ -116,7 +118,8 @@ class Payfast implements PaymentProcessor
             'custom_str2' => $this->custom_str2,
             'custom_str3' => $this->custom_str3,
             'custom_str4' => $this->custom_str4,
-            'custom_str5' => $this->custom_str5
+            'custom_str5' => $this->custom_str5,
+            'payment_method' => $this->payment_method
         ]);
     }
 
@@ -316,5 +319,10 @@ class Payfast implements PaymentProcessor
     public function setCustomInt5($int)
     {
         $this->custom_int5 = $int;
+    }
+
+    public function setPaymentMethod($method)
+    {
+        $this->payment_method = $method;
     }
 }

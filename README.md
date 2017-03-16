@@ -61,6 +61,8 @@ IMPORTANT: You will need to edit App\Http\Middleware\VerifyCsrfToken by adding t
 
 Creating a payment returns an html form ready to POST to payfast. When the customer submits the form they will be redirected to payfast to complete payment. Upon successful payment the customer will be returned to the specified 'return_url' and in the case of a cancellation they will be returned to the specified 'cancel_url'
 
+##### If you are doing a "once off" payment.
+
 ```php
 
 use Billow\Contracts\PaymentProcessor;
@@ -84,7 +86,46 @@ Class PaymentController extends Controller
         $payfast->setMerchantReference($order->m_payment_id);
     
         // Return the payment form.
-        return $payfast->paymentForm('Place Order');
+        return $payfast->paymentForm('Place Order', 'once_off', null);
+    }
+            
+}
+```  
+
+##### If you are subscribing a user to monthly payments etc.
+
+```php
+
+use Billow\Contracts\PaymentProcessor;
+    
+Class PaymentController extends Controller
+{
+
+    public function confirmPayment(PaymentProcessor $payfast)
+    {
+        // Eloqunet example.  
+        $cartTotal = 9999;
+        $order = Order::create([
+                'm_payment_id' => '001', // A unique reference for the order.
+                'amount'       => $cartTotal     
+            ]);
+    
+        // Build up payment Paramaters.
+        $payfast->setBuyer('first name', 'last name', 'email');
+        $payfast->setAmount($order->amount);
+        $payfast->setItem('item-title', 'item-description');
+        $payfast->setMerchantReference($order->m_payment_id);
+
+        $subscription_options = array(
+            "subscription_type" => "1",
+            "billing_date" => "YYYY-MM-DD", // I.E. 17-03-2017
+            "recurring_amount" => "", // I.E. 56.00
+            "frequency" => "3", // 3 - Monthly, 4 - Quarterly, 5 - Biannual, 6 - Annual
+            "cycles" => "0" // 0 - Infinity
+        );
+    
+        // Return the payment form.
+        return $payfast->paymentForm('Place Order', 'subscription', $subscription_options);
     }
             
 }

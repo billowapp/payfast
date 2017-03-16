@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 class Payfast implements PaymentProcessor
 {
 
+    protected $payment_inputs;
+
     protected $merchant;
 
     protected $buyer;
@@ -93,18 +95,28 @@ class Payfast implements PaymentProcessor
         $this->amount = $money->convertedAmount();
     }
 
-    public function paymentForm($submitButton = true)
+    public function paymentForm($submitButton = true, $type = "once_off", $options = null)
     {
+
+        /*
+         * $options -- Refer to line 140 for explination.
+         *
+         * Once Off Payment: $payfast->paymentForm('Pay Now', "once_off" null);
+         * Once Off Payment: $payfast->paymentForm('Pay Now', "subscription" $options);
+        */
+
+
         $this->button = $submitButton;
-        $this->vars = $this->paymentVars();
+        $this->vars = $this->paymentVars($type, $options = null);
         $this->buildQueryString();
         $this->vars['signature'] = md5($this->output);
         return $this->buildForm();
     }
 
-    public function paymentVars()
+    public function paymentVars($type, $options = null)
     {
-        return array_merge($this->merchant, $this->buyer, [
+
+        $this->payment_inputs = array(
             'm_payment_id' => $this->merchantReference, 
             'amount' => $this->amount,
             'item_name'         => $this->item['item_name'],
@@ -120,7 +132,37 @@ class Payfast implements PaymentProcessor
             'custom_str4' => $this->custom_str4,
             'custom_str5' => $this->custom_str5,
             'payment_method' => $this->payment_method
-        ]);
+        );
+
+        /*
+        
+        If the subscription type is set then the array should be structured as follows.
+
+        Subscription Type: 1
+
+        $options = array(
+            "subscription_type" => "1",
+            "billing_date" => "YYYY-MM-DD",
+            "recurring_amount" => "",
+            "frequency" => "3", // 3 - Monthly, 4 - Quarterly, 5 - Biannual, 6 - Annual
+            "cycles" => "0" // 0 - Infinity
+        );
+
+        Subscription Type: 2
+
+        $options = array(
+            "subscription_type" => "2",
+        );
+        
+        */
+
+        if ($type == "subscription" && $options != null) {
+            if ($options != null) {
+                array_merge($this->payment_inputs, $options);
+            }
+        }
+
+        return array_merge($this->merchant, $this->buyer, $this->payment_inputs);
     }
 
     public function buildQueryString()

@@ -157,9 +157,7 @@ class Payfast implements PaymentProcessor
         */
 
         if ($type == "subscription" && $options != null) {
-            if ($options != null) {
-                array_merge($this->payment_inputs, $options);
-            }
+            array_merge($this->payment_inputs, $options);
         }
 
         return array_merge($this->merchant, $this->buyer, $this->payment_inputs);

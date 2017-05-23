@@ -1,6 +1,6 @@
 # Laravel5 Payfast
 
-A dead simple Laravel 5.2 payment processing class for payments through payfast.co.za. This package only supports ITN transactions. Laravel5 Payfast is strictly use at own risk.
+A dead simple Laravel 5.2, 5.3, 5.4 payment processing class for payments through payfast.co.za. This package only supports ITN transactions. Laravel5 Payfast is strictly use at own risk.
 
 ## Installation
 
@@ -199,10 +199,3 @@ $payfast->getPaymentForm(false) // No submit button, handy for submitting the fo
 $payfast->getPaymentForm('Confirm and Pay') // Override Default Submit Button Text.
 
 ```
-
-### To Do's
-
-1. Unit Testing
-2. Add in a Facade Class
-3. Allow for custom integers/strings
-4. Curl request to Payfast (validation)

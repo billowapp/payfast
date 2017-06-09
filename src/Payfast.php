@@ -54,12 +54,23 @@ class Payfast implements PaymentProcessor
     
     protected $payment_method;
 
-
+    protected $passphrase;
+    
     public function __construct()
     {
         $this->merchant = config('payfast.merchant');
     }
-
+    
+    public function setPassphrase($passphrase=null)
+    {
+        $this->passphrase = $passphrase;    
+    }
+    
+    public function getPassphrase()
+    {
+        return $this->passphrase;
+    }
+    
     public function getMerchant()
     {
         return $this->merchant;
@@ -132,10 +143,11 @@ class Payfast implements PaymentProcessor
             }
         }
         $this->output = substr( $this->output, 0, -1 );
-        if( isset( $passPhrase ) )
-        {
-            $this->output .= '&passphrase='.$passPhrase;
-        }
+        
+        /**
+        * Set the new passphrase
+        */
+        $this->output .= '&passphrase='.$this->getPassphrase();
     }
 
     public function buildForm()

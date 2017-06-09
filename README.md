@@ -78,6 +78,8 @@ Class PaymentController extends Controller
             ]);
     
         // Build up payment Paramaters.
+        // You can get the passphrase from your payfast account profile
+        $payfast->setPassphrase('your-passphrase-value');
         $payfast->setBuyer('first name', 'last name', 'email');
         $payfast->setAmount($order->amount);
         $payfast->setItem('item-title', 'item-description');

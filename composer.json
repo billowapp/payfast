@@ -5,8 +5,8 @@
   "keywords": ["package", "laravel", "payfast"],
   "license": "MIT",
   "require": {
-    "illuminate/support": "^5.2",
-    "illuminate/http": "^5.2",
+    "illuminate/support": "^5.4",
+    "illuminate/http": "^5.4",
     "billowapp/show-me-the-money": "^0.1.2"
   },
   "autoload": {

@@ -16,5 +16,12 @@
   },
   "require-dev": {
     "symfony/var-dumper": "^3.0"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Billow\\PayfastServiceProvider"
+      ]
+    }
   }
 }

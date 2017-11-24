@@ -221,8 +221,11 @@ class Payfast implements PaymentProcessor
 
     public function getHTTPXForwardedFor($request)
     {
-        $hosts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-        $host  = trim(end($hosts));
+        $host = '';
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $hosts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            $host  = trim(end($hosts));
+        }
         return $host;
     }
 

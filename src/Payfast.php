@@ -53,11 +53,24 @@ class Payfast implements PaymentProcessor
     protected $custom_int5;
     
     protected $payment_method;
+    
+    protected $passphrase;
 
 
     public function __construct()
     {
         $this->merchant = config('payfast.merchant');
+        $this->passphrase = config('payfast.passphrase');
+    }
+    
+    public function setPassphrase($passphrase=null)
+    {
+        $this->passphrase = $passphrase;    
+    }
+    
+    public function getPassphrase()
+    {
+        return $this->passphrase;
     }
 
     public function getMerchant()
@@ -123,18 +136,22 @@ class Payfast implements PaymentProcessor
         ]);
     }
 
-    public function buildQueryString()
+    public function buildQueryString($includeEmpty = false)
     {
         foreach($this->vars as $key => $val )
         {
-            if(!empty($val)) {
+            if( $key == 'signature' ){
+                continue;
+            }
+
+            if($includeEmpty || !empty($val)) {
                 $this->output .= $key .'='. urlencode( trim( $val ) ) .'&';
             }
         }
         $this->output = substr( $this->output, 0, -1 );
-        if( isset( $passPhrase ) )
+        if($this->getPassphrase() != null)
         {
-            $this->output .= '&passphrase='.$passPhrase;
+            $this->output .= '&passphrase='.$this->getPassphrase();
         }
     }
 
@@ -162,10 +179,12 @@ class Payfast implements PaymentProcessor
         {
             $this->vars[$key] = stripslashes($val);
         }
-        $this->buildQueryString();
+        $this->buildQueryString(true);
+        $this->vars['signature'] = md5($this->output);
         $this->validSignature($request->get('signature'));
         $this->validateHost($request);
         $this->validateAmount($request->get('amount_gross'));
+        $this->validateCurl();
         $this->status = $request->get('payment_status');
         return $this;
     }
@@ -227,6 +246,39 @@ class Payfast implements PaymentProcessor
         }
     }
 
+    public function validateCurl(){
+        // Variable initialization
+        $url = 'https://'. $this->host .'/eng/query/validate';
+
+        // Create default cURL object
+        $ch = curl_init();
+
+        // Set cURL options - Use curl_setopt for greater PHP compatibility
+        // Base settings
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+        curl_setopt( $ch, CURLOPT_HEADER, false );      
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 );
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 1 );
+
+        // Standard settings
+        curl_setopt( $ch, CURLOPT_URL, $url );
+        curl_setopt( $ch, CURLOPT_POST, true );
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $this->output );
+
+        // Execute CURL
+        $response = curl_exec( $ch );
+        curl_close( $ch );
+
+        $lines = explode( "\r\n", $response );
+        $verifyResult = trim( $lines[0] );
+
+        if( strcasecmp( $verifyResult, 'VALID' ) == 0 )
+        {
+            return true;
+        }else{
+            throw new Exception('The Data is not valid');
+        }
+    }
     public function newMoney($amount)
     {
         return(is_string($amount) || is_float($amount))

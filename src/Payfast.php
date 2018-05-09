@@ -61,6 +61,9 @@ class Payfast implements PaymentProcessor
     {
         $this->merchant = config('payfast.merchant');
         $this->passphrase = config('payfast.passphrase');
+
+        $this->setBuyer(null, null, null);
+        $this->setItem(null, null);
     }
     
     public function setPassphrase($passphrase=null)
@@ -110,8 +113,7 @@ class Payfast implements PaymentProcessor
     {
         $this->button = $submitButton;
         $this->vars = $this->paymentVars();
-        $this->buildQueryString();
-        $this->vars['signature'] = md5($this->output);
+        $this->vars['signature'] = $this->getSignature();
         return $this->buildForm();
     }
 
@@ -149,10 +151,8 @@ class Payfast implements PaymentProcessor
             }
         }
         $this->output = substr( $this->output, 0, -1 );
-        if($this->getPassphrase() != null)
-        {
-            $this->output .= '&passphrase='.$this->getPassphrase();
-        }
+
+        return $this->output;
     }
 
     public function buildForm()
@@ -165,8 +165,14 @@ class Payfast implements PaymentProcessor
         }
         if($this->button)
         {
-            $htmlForm .= '<button type="submit">'.$this->getSubmitButton().'</button>';
+            if (config('payfast.button-view', false)) {
+                $htmlForm .= view(config('payfast.button-view'));
+            } else {
+                $htmlForm .= '<button type="submit">'.$this->getSubmitButton().'</button>';
+            }
         }
+
+        
         return $htmlForm.'</form>';
     }
 
@@ -175,13 +181,14 @@ class Payfast implements PaymentProcessor
         $this->setHeader();
         $this->response_vars = $request->all();
         $this->setAmount($amount);
+
         foreach($this->response_vars as $key => $val)
         {
             $this->vars[$key] = stripslashes($val);
         }
-        $this->buildQueryString(true);
-        $this->vars['signature'] = md5($this->output);
-        $this->validSignature($request->get('signature'));
+        $this->vars['signature'] = $this->getSignature(true);
+        
+        $this->validateSignature($request->get('signature'));
         $this->validateHost($request);
         $this->validateAmount($request->get('amount_gross'));
         $this->validateCurl();
@@ -200,7 +207,7 @@ class Payfast implements PaymentProcessor
         flush();
     }
 
-    public function validSignature($signature)
+    public function validateSignature($signature)
     {
         if($this->vars['signature'] === $signature)
         {
@@ -247,8 +254,11 @@ class Payfast implements PaymentProcessor
     }
 
     public function validateCurl(){
+
+        $params = $this->buildQueryString(true);
+
         // Variable initialization
-        $url = 'https://'. $this->host .'/eng/query/validate';
+        $url = 'https://'. $this->getHost() .'/eng/query/validate';
 
         // Create default cURL object
         $ch = curl_init();
@@ -263,10 +273,11 @@ class Payfast implements PaymentProcessor
         // Standard settings
         curl_setopt( $ch, CURLOPT_URL, $url );
         curl_setopt( $ch, CURLOPT_POST, true );
-        curl_setopt( $ch, CURLOPT_POSTFIELDS, $this->output );
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $params );
 
         // Execute CURL
         $response = curl_exec( $ch );
+
         curl_close( $ch );
 
         $lines = explode( "\r\n", $response );
@@ -275,7 +286,7 @@ class Payfast implements PaymentProcessor
         if( strcasecmp( $verifyResult, 'VALID' ) == 0 )
         {
             return true;
-        }else{
+        } else {
             throw new Exception('The Data is not valid');
         }
     }
@@ -376,5 +387,17 @@ class Payfast implements PaymentProcessor
     public function setPaymentMethod($method)
     {
         $this->payment_method = $method;
+    }
+
+    private function getSignature($includeEmpty = false)
+    {
+        $params = $this->buildQueryString($includeEmpty);
+
+        if($this->getPassphrase() != null)
+        {
+            $params .= '&passphrase='.$this->getPassphrase();
+        }
+
+        return md5($params);
     }
 }

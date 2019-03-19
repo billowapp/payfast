@@ -194,7 +194,7 @@ class Payfast implements PaymentProcessor
         }
         $this->vars['signature'] = $this->getSignature(true);
         
-        $this->validateSignature($request->get('signature'));
+        $this->validSignature($request->get('signature'));
         $this->validateHost($request);
         $this->validateAmount($request->get('amount_gross'));
         $this->validateCurl();
@@ -213,7 +213,7 @@ class Payfast implements PaymentProcessor
         flush();
     }
 
-    public function validateSignature($signature)
+    public function validSignature($signature)
     {
         if($this->vars['signature'] === $signature)
         {

@@ -56,8 +56,6 @@ class Payfast implements PaymentProcessor
     
     protected $passphrase;
 
-    protected $passphrase;
-
     public function __construct()
     {
         $this->merchant = config('payfast.merchant');

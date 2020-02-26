@@ -45,13 +45,13 @@ class Payfast implements PaymentProcessor
     protected $custom_int1;
 
     protected $custom_int2;
-    
+
     protected $custom_int3;
 
     protected $custom_int4;
 
     protected $custom_int5;
-    
+
     protected $payment_method;
 
     protected $passphrase;
@@ -102,7 +102,7 @@ class Payfast implements PaymentProcessor
     public function setAmount($amount)
     {
         $money = $this->newMoney($amount);
-        $this->amount = $money->convertedAmount();
+        $this->amount = number_format( sprintf( '%.2f', $money->convertedAmount()), 2, '.', '');
     }
 
     public function paymentForm($submitButton = true)
@@ -117,7 +117,7 @@ class Payfast implements PaymentProcessor
     public function paymentVars()
     {
         return array_merge($this->merchant, $this->buyer, [
-            'm_payment_id' => $this->merchantReference, 
+            'm_payment_id' => $this->merchantReference,
             'amount' => $this->amount,
             'item_name'         => $this->item['item_name'],
             'item_description'  => $this->item['item_description'],
@@ -146,7 +146,7 @@ class Payfast implements PaymentProcessor
         $this->output = substr( $this->output, 0, -1 );
         if( !empty( $this->passphrase ) )
         {
-            $this->output .= '&passphrase=' . $this->passphrase;
+            $this->output .= '&passphrase=' . urlencode( trim( $this->passphrase ) );
         }
     }
 

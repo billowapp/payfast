@@ -2,7 +2,8 @@
   "name": "billowapp/payfast",
   "authors": [
     {
-      "name": "Warren Hansen"
+      "name": "Warren Hansen",
+      "email": "warren@billow.co.za"
     }
   ],
   "description": "Laravel 5.4+|6+ package for processing ITN payments through payfast.co.za",

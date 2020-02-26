@@ -18,8 +18,15 @@
       "Billow\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Billow\\Payfast\\Test\\": "tests/"
+    }
+  },
   "require-dev": {
-    "symfony/var-dumper": "^3.0"
+    "symfony/var-dumper": "^4.3",
+    "phpunit/phpunit": "^8.5",
+    "orchestra/testbench": "^4.6"
   },
   "extra": {
     "laravel": {

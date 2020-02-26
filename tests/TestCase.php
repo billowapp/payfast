@@ -2,7 +2,7 @@
 
 namespace Billow\Payfast\Test;
 
-class TestCase extends Orchestra\Testbench\TestCase
+class TestCase extends \Orchestra\Testbench\TestCase
 {
     /**
      * Load package service provider
@@ -12,6 +12,6 @@ class TestCase extends Orchestra\Testbench\TestCase
      */
     public function getPackageProviders($app)
     {
-        return ['Billow\PayfastServiceProvider\PayfastServiceProvider'];
+        return ['Billow\PayfastServiceProvider'];
     }
 }

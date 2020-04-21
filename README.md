@@ -1,6 +1,6 @@
 # Laravel Payfast
 
-A dead simple Laravel 5.2+/6+ payment processing class for payments through payfast.co.za. This package only supports ITN transactions. Laravel Payfast is strictly use at own risk.
+A dead simple Laravel payment processing class for payments through payfast.co.za. This package only supports ITN transactions. Laravel Payfast is strictly use at own risk.
 
 ## Installation
 
@@ -188,14 +188,14 @@ $payfast->setAmount($cartTotal);
 
 ### Payment Form
 
-By default the getPaymentForm() method will return a compiled HTML form including a submit button. There are 3 configurations available for the submit button.
+By default the paymentForm() method will return a compiled HTML form including a submit button. There are 3 configurations available for the submit button.
 
 ```php
 
-$payfast->getPaymentForm() // Default Text: 'Pay Now'
+$payfast->paymentForm() // Default Text: 'Pay Now'
 
-$payfast->getPaymentForm(false) // No submit button, handy for submitting the form via javascript
+$payfast->paymentForm(false) // No submit button, handy for submitting the form via javascript
 
-$payfast->getPaymentForm('Confirm and Pay') // Override Default Submit Button Text.
+$payfast->paymentForm('Confirm and Pay') // Override Default Submit Button Text.
 
 ```

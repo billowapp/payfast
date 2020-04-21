@@ -53,13 +53,20 @@ class Payfast implements PaymentProcessor
     protected $custom_int5;
     
     protected $payment_method;
-
+    
     protected $passphrase;
 
     public function __construct()
     {
         $this->merchant = config('payfast.merchant');
         $this->passphrase = config('payfast.passphrase');
+        $this->setBuyer(null, null, null);
+        $this->setItem(null, null);
+    }
+        
+    public function getPassphrase()
+    {
+        return $this->passphrase;
     }
 
     public function getMerchant()
@@ -81,7 +88,7 @@ class Payfast implements PaymentProcessor
         ];
     }
 
-    public function setPassphrase(string $passphrase)
+    public function setPassphrase(string $passphrase = null)
     {
         $this->passphrase = $passphrase;
     }
@@ -109,8 +116,7 @@ class Payfast implements PaymentProcessor
     {
         $this->button = $submitButton;
         $this->vars = $this->paymentVars();
-        $this->buildQueryString();
-        $this->vars['signature'] = md5($this->output);
+        $this->vars['signature'] = $this->getSignature();
         return $this->buildForm();
     }
 
@@ -135,19 +141,22 @@ class Payfast implements PaymentProcessor
         ]);
     }
 
-    public function buildQueryString()
+    public function buildQueryString($includeEmpty = false)
     {
         foreach($this->vars as $key => $val )
         {
-            if(!empty($val)) {
+            if( $key == 'signature' ){
+                continue;
+            }
+
+            if($includeEmpty || !empty($val)) {
                 $this->output .= $key .'='. urlencode( trim( $val ) ) .'&';
             }
         }
+      
         $this->output = substr( $this->output, 0, -1 );
-        if( !empty( $this->passphrase ) )
-        {
-            $this->output .= '&passphrase=' . $this->passphrase;
-        }
+      
+        return $this->output;
     }
 
     public function buildForm()
@@ -160,8 +169,14 @@ class Payfast implements PaymentProcessor
         }
         if($this->button)
         {
-            $htmlForm .= '<button type="submit">'.$this->getSubmitButton().'</button>';
+            if (config('payfast.button-view', false)) {
+                $htmlForm .= view(config('payfast.button-view'));
+            } else {
+                $htmlForm .= '<button type="submit">'.$this->getSubmitButton().'</button>';
+            }
         }
+
+        
         return $htmlForm.'</form>';
     }
 
@@ -170,14 +185,17 @@ class Payfast implements PaymentProcessor
         $this->setHeader();
         $this->response_vars = $request->all();
         $this->setAmount($amount);
+
         foreach($this->response_vars as $key => $val)
         {
             $this->vars[$key] = stripslashes($val);
         }
-        $this->buildQueryString();
+        $this->vars['signature'] = $this->getSignature(true);
+        
         $this->validSignature($request->get('signature'));
         $this->validateHost($request);
         $this->validateAmount($request->get('amount_gross'));
+        $this->validateCurl();
         $this->status = $request->get('payment_status');
         return $this;
     }
@@ -239,6 +257,43 @@ class Payfast implements PaymentProcessor
         }
     }
 
+    public function validateCurl(){
+
+        $params = $this->buildQueryString(true);
+
+        // Variable initialization
+        $url = 'https://'. $this->getHost() .'/eng/query/validate';
+
+        // Create default cURL object
+        $ch = curl_init();
+
+        // Set cURL options - Use curl_setopt for greater PHP compatibility
+        // Base settings
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+        curl_setopt( $ch, CURLOPT_HEADER, false );      
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 );
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 1 );
+
+        // Standard settings
+        curl_setopt( $ch, CURLOPT_URL, $url );
+        curl_setopt( $ch, CURLOPT_POST, true );
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $params );
+
+        // Execute CURL
+        $response = curl_exec( $ch );
+
+        curl_close( $ch );
+
+        $lines = explode( "\r\n", $response );
+        $verifyResult = trim( $lines[0] );
+
+        if( strcasecmp( $verifyResult, 'VALID' ) == 0 )
+        {
+            return true;
+        } else {
+            throw new Exception('The Data is not valid');
+        }
+    }
     public function newMoney($amount)
     {
         return(is_string($amount) || is_float($amount))
@@ -336,5 +391,17 @@ class Payfast implements PaymentProcessor
     public function setPaymentMethod($method)
     {
         $this->payment_method = $method;
+    }
+
+    private function getSignature($includeEmpty = false)
+    {
+        $params = $this->buildQueryString($includeEmpty);
+
+        if($this->getPassphrase() != null)
+        {
+            $params .= '&passphrase='.$this->getPassphrase();
+        }
+
+        return md5($params);
     }
 }

@@ -223,9 +223,10 @@ class Payfast implements PaymentProcessor
 
     public function validateHost($request)
     {
-        $hosts = $this->getHosts();
+        $hosts             = $this->getHosts();
+        $HTTPXForwardedFor = $this->getHTTPXForwardedFor($request);
 
-        if( !in_array( $request->server('REMOTE_ADDR'), $hosts ) )
+        if( !in_array( $request->server('REMOTE_ADDR'), $hosts ) && !in_array( $HTTPXForwardedFor, $hosts ) )
         {
             throw new Exception('Not a valid Host');
         }
@@ -246,6 +247,16 @@ class Payfast implements PaymentProcessor
             }
         }
         return array_unique($hosts);
+    }
+
+    public function getHTTPXForwardedFor($request)
+    {
+        $host = '';
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $hosts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            $host  = trim(end($hosts));
+        }
+        return $host;
     }
 
     public function validateAmount($grossAmount)

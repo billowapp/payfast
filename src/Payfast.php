@@ -4,7 +4,6 @@ namespace Billow;
 
 use Billow\Contracts\PaymentProcessor;
 use Billow\Utilities\Money;
-use Exception;
 use Illuminate\Http\Request;
 
 class Payfast implements PaymentProcessor
@@ -45,16 +44,26 @@ class Payfast implements PaymentProcessor
     protected $custom_int1;
 
     protected $custom_int2;
-    
+
     protected $custom_int3;
 
     protected $custom_int4;
 
     protected $custom_int5;
-    
+
+    protected $email_confirmation;
+
+    protected $confirmation_address;
+
     protected $payment_method;
-    
+
     protected $passphrase;
+
+    protected $subscriptionType;
+
+    protected $frequency;
+
+    protected $cycles;
 
     public function __construct()
     {
@@ -63,7 +72,7 @@ class Payfast implements PaymentProcessor
         $this->setBuyer(null, null, null);
         $this->setItem(null, null);
     }
-        
+
     public function getPassphrase()
     {
         return $this->passphrase;
@@ -122,23 +131,33 @@ class Payfast implements PaymentProcessor
 
     public function paymentVars()
     {
-        return array_merge($this->merchant, $this->buyer, [
-            'm_payment_id' => $this->merchantReference, 
-            'amount' => $this->amount,
-            'item_name'         => $this->item['item_name'],
-            'item_description'  => $this->item['item_description'],
-            'custom_int1' => $this->custom_int1,
-            'custom_int2' => $this->custom_int2,
-            'custom_int3' => $this->custom_int3,
-            'custom_int4' => $this->custom_int4,
-            'custom_int5' => $this->custom_int5,
-            'custom_str1' => $this->custom_str1,
-            'custom_str2' => $this->custom_str2,
-            'custom_str3' => $this->custom_str3,
-            'custom_str4' => $this->custom_str4,
-            'custom_str5' => $this->custom_str5,
-            'payment_method' => $this->payment_method
+        $paymentVars = array_merge($this->merchant, $this->buyer, [
+            'm_payment_id'         => $this->merchantReference,
+            'amount'               => $this->amount,
+            'item_name'            => $this->item['item_name'],
+            'item_description'     => $this->item['item_description'],
+            'custom_int1'          => $this->custom_int1,
+            'custom_int2'          => $this->custom_int2,
+            'custom_int3'          => $this->custom_int3,
+            'custom_int4'          => $this->custom_int4,
+            'custom_int5'          => $this->custom_int5,
+            'custom_str1'          => $this->custom_str1,
+            'custom_str2'          => $this->custom_str2,
+            'custom_str3'          => $this->custom_str3,
+            'custom_str4'          => $this->custom_str4,
+            'custom_str5'          => $this->custom_str5,
+            'email_confirmation'   => (int)$this->email_confirmation,
+            'confirmation_address' => $this->confirmation_address,
+            'payment_method'       => $this->payment_method
         ]);
+
+        if (is_numeric($this->subscriptionType)) {
+            $paymentVars['subscription_type'] = $this->subscriptionType;
+            $paymentVars['frequency']         = $this->frequency;
+            $paymentVars['cycles']            = $this->cycles;
+        }
+
+        return $paymentVars;
     }
 
     public function buildQueryString($includeEmpty = false)
@@ -149,13 +168,13 @@ class Payfast implements PaymentProcessor
                 continue;
             }
 
-            if($includeEmpty || !empty($val)) {
+            if ($includeEmpty || $val === 0 || !empty($val)) {
                 $this->output .= $key .'='. urlencode( trim( $val ) ) .'&';
             }
         }
-      
+
         $this->output = substr( $this->output, 0, -1 );
-      
+
         return $this->output;
     }
 
@@ -165,7 +184,10 @@ class Payfast implements PaymentProcessor
         $htmlForm = '<form id="payfast-pay-form" action="https://'.$this->host.'/eng/process" method="post">';
         foreach($this->vars as $name => $value)
         {
-            $htmlForm .= '<input type="hidden" name="'.$name.'" value="'.$value.'">';
+            // empty fields should not be sent across it breaks certain payment methods
+            if (!empty($value) || $value === 0) {
+                $htmlForm .= '<input type="hidden" name="' . $name . '" value="' . $value . '">';
+            }
         }
         if($this->button)
         {
@@ -176,7 +198,6 @@ class Payfast implements PaymentProcessor
             }
         }
 
-        
         return $htmlForm.'</form>';
     }
 
@@ -191,7 +212,7 @@ class Payfast implements PaymentProcessor
             $this->vars[$key] = stripslashes($val);
         }
         $this->vars['signature'] = $this->getSignature(true);
-        
+
         $this->validSignature($request->get('signature'));
         $this->validateHost($request);
         $this->validateAmount($request->get('amount_gross'));
@@ -223,6 +244,11 @@ class Payfast implements PaymentProcessor
 
     public function validateHost($request)
     {
+        // alow local testing
+        if (env('APP_ENV') !== 'production') {
+            return true;
+        }
+
         $hosts = $this->getHosts();
 
         if( !in_array( $request->server('REMOTE_ADDR'), $hosts ) )
@@ -257,8 +283,8 @@ class Payfast implements PaymentProcessor
         }
     }
 
-    public function validateCurl(){
-
+    public function validateCurl()
+    {
         $params = $this->buildQueryString(true);
 
         // Variable initialization
@@ -270,7 +296,7 @@ class Payfast implements PaymentProcessor
         // Set cURL options - Use curl_setopt for greater PHP compatibility
         // Base settings
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-        curl_setopt( $ch, CURLOPT_HEADER, false );      
+        curl_setopt( $ch, CURLOPT_HEADER, false );
         curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 );
         curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 1 );
 
@@ -294,6 +320,7 @@ class Payfast implements PaymentProcessor
             throw new Exception('The Data is not valid');
         }
     }
+
     public function newMoney($amount)
     {
         return(is_string($amount) || is_float($amount))
@@ -388,6 +415,16 @@ class Payfast implements PaymentProcessor
         $this->custom_int5 = $int;
     }
 
+    public function setEmailConfirmation(bool $send = true)
+    {
+        $this->email_confirmation = $send;
+    }
+
+    public function setConfirmationAddress(string $email)
+    {
+        $this->confirmation_address = $email;
+    }
+
     public function setPaymentMethod($method)
     {
         $this->payment_method = $method;
@@ -403,5 +440,28 @@ class Payfast implements PaymentProcessor
         }
 
         return md5($params);
+    }
+
+    public function setSubscriptionType(int $type = 1)
+    {
+        $this->subscriptionType = $type;
+
+        if (empty($this->frequency)) {
+            $this->setFrequency();
+        }
+
+        if (empty($this->cycles)) {
+            $this->setCycles();
+        }
+    }
+
+    public function setFrequency(int $frequency = 3)
+    {
+        $this->frequency = $frequency;
+    }
+
+    public function setCycles(int $cycles = 0)
+    {
+        $this->cycles = $cycles;
     }
 }

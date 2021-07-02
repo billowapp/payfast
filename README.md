@@ -61,6 +61,13 @@ IMPORTANT: You will need to edit App\Http\Middleware\VerifyCsrfToken by adding t
 
 Creating a payment returns an html form ready to POST to payfast. When the customer submits the form they will be redirected to payfast to complete payment. Upon successful payment the customer will be returned to the specified 'return_url' and in the case of a cancellation they will be returned to the specified 'cancel_url'
 
+---
+**NOTE**
+
+If you want to use subscripions, make sure to set your merchant's passphrase in the config file for this package. It is required for subscriptions.
+
+---
+
 ```php
 
 use Billow\Contracts\PaymentProcessor;
@@ -73,15 +80,24 @@ Class PaymentController extends Controller
         // Eloqunet example.
         $cartTotal = 9999;
         $order = Order::create([
-                'm_payment_id' => '001', // A unique reference for the order.
-                'amount'       => $cartTotal
-            ]);
+            'm_payment_id' => '001', // A unique reference for the order.
+            'amount'       => $cartTotal
+        ]);
 
         // Build up payment Paramaters.
         $payfast->setBuyer('first name', 'last name', 'email');
         $payfast->setAmount($order->amount);
         $payfast->setItem('item-title', 'item-description');
         $payfast->setMerchantReference($order->m_payment_id);
+
+        // Optionally send confirmation email to seller
+        $payfast->setEmailConfirmation();
+        $payfast->setConfirmationAddress(env('PAYFAST_CONFIRMATION_EMAIL'));
+
+        // Optionally make this a subscription
+        $payfast->setSubscriptionType();    // will default to 1
+        $payfast->setFrequency();           // will default to 3 = monthly if not set
+        $payfast->setCycles();              // will default to 0 = indefinite if not set
 
         // Return the payment form.
         return $payfast->paymentForm('Place Order');

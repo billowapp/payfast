@@ -12,17 +12,12 @@
     ],
     "license": "MIT",
     "require": {
-        "illuminate/support": "^5.4|^6.0|^7.0|^8.0",
-        "illuminate/http": "^5.4|^6.0|^7.0|^8.0",
-        "billowapp/show-me-the-money": "^0.1.2|^0.2"
+        "billowapp/show-me-the-money": "*"
     },
     "autoload": {
         "psr-4": {
             "Billow\\": "src/"
         }
-    },
-    "require-dev": {
-        "symfony/var-dumper": "^3.0"
     },
     "extra": {
         "laravel": {

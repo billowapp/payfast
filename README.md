@@ -1,4 +1,5 @@
 # Laravel Payfast
+>> fork this to make it Laravel 9 and php 8 supported
 
 A dead simple Laravel payment processing class for payments through payfast.co.za. This package only supports ITN transactions. Laravel Payfast is strictly use at own risk.
 
@@ -10,15 +11,6 @@ Add Laravel Payfast to your composer.json
 composer require billowapp/payfast
 ```
 
-Add the PayfastServiceProvider to your providers array in config/app.php
-
-```php
-'providers' => [
-    //
-
-    'Billow\PayfastServiceProvider'
-];
-```
 ### Config
 publish default configuration file.
 

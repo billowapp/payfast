@@ -6,12 +6,12 @@
       "email": "warren@billow.co.za"
     }
   ],
-  "description": "Laravel 5.4+|6+|7+|8+ package for processing ITN payments through payfast.co.za",
+  "description": "Laravel 5.4+|6+|7+|8+|9+ package for processing ITN payments through payfast.co.za",
   "keywords": ["package", "laravel", "payfast"],
   "license": "MIT",
   "require": {
-    "illuminate/support": "^5.4|^6.0|^7.0|^8.0",
-    "illuminate/http": "^5.4|^6.0|^7.0|^8.0",
+    "illuminate/support": "^5.4|^6.0|^7.0|^8.0|^9.0",
+    "illuminate/http": "^5.4|^6.0|^7.0|^8.0|^9.0",
     "billowapp/show-me-the-money": "^0.1.2|^0.2|^0.4"
   },
   "autoload": {

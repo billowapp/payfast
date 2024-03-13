@@ -4,7 +4,7 @@ namespace Billow;
 
 use Billow\Contracts\PaymentProcessor;
 use Billow\Utilities\Money;
-use Illuminate\Http\Request;
+use Exception;
 
 class Payfast implements PaymentProcessor
 {
